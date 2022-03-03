@@ -5,14 +5,14 @@ services:
     ports:
       - 27017:27017
   server:
-    image: meanbookmarkserver:1.0.0
+    image: meanbookmarkserver:1.1.0
     build: server
     ports:
       - 3000:3000
     links:
       - meanbookmarkdb
   client:
-    image: meanbookmarkapp:1.0.0
+    image: meanbookmarkapp:1.1.0
     build: client
     ports:
       - 4200:80

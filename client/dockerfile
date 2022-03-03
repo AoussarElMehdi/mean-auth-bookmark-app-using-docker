@@ -1,10 +1,12 @@
-FROM node:latest as builder
+FROM node:alpine as builder
 WORKDIR /app
 COPY package*.json /app
-RUN npm install
+RUN cd /app && npm set progress=false && npm install
 COPY . /app
-RUN npm run build
+RUN cd /app && npm run build
 
-FROM nginx:latest
-EXPOSE 80
+FROM nginx:alpine
+RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder app/dist/client /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
