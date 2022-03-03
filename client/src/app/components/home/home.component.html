@@ -1,0 +1,80 @@
+<div class="container-fluid">
+  <div class="border border-primary p-3 mt-2 mb-5 bg-white rounded ">
+    <form [formGroup]="form" (submit)="saveOrUpdate()">
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <h5 class="text-secondary">BookMark Form</h5>
+          <hr />
+        </div>
+      </div>
+      <div class="form-group row mb-2">
+        <label for="id" class="col-sm-2 col-form-label">id</label>
+        <div class="col-sm-10">
+          <input type="text" readonly formControlName="_id" class="form-control" id="id" >
+        </div>
+      </div>
+      <div class="form-group row mb-2">
+        <label for="nom" class="col-sm-2 col-form-label">title</label>
+        <div class="col-sm-10">
+          <input type="text" formControlName="title" class="form-control" id="nom"
+          [ngClass]="{ 'is-invalid': submitted && f['title'].errors }" >
+          <div *ngIf="submitted && f['title'].errors" class="invalid-feedback">
+            <div *ngIf="f['title'].errors['required']">title is required</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-2">
+        <label for="nbr-fans" class="col-sm-2 col-form-label">link</label>
+        <div class="col-sm-10">
+          <input type="text" formControlName="link" class="form-control" id="nbr-fans"
+          [ngClass]="{ 'is-invalid': submitted && f['link'].errors }">
+          <div *ngIf="submitted && f['link'].errors" class="invalid-feedback">
+            <div *ngIf="f['link'].errors['required']">link is required</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-2">
+        <label for="adr" class="col-sm-2 col-form-label">descripton</label>
+        <div class="col-sm-10">
+          <textarea type="text" formControlName="description" class="form-control" id="adr"></textarea>
+        </div>
+      </div>
+      <div class="form-group row gap-1 px-2">
+        <button type="button" class="col btn btn-info" type="submit">Enregistrer</button>
+        <button type="button" class="col btn btn-light" type="reset" (click)="onReset()">Cancel</button>
+      </div>
+    </form>
+  </div>
+  <!-- <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+    <a type="button" class="btn btn-info mb-2">Insert BookMark</a>
+  </div> -->
+  <div class="card shadow-sm bg-light mb-3" *ngFor="let bookMark of bookMarks">
+    <div class="card-header">{{bookMark.title}}</div>
+    <div class="card-body">
+      <div class="d-flex align-items-start justify-content-between">
+        <div class="form-group">
+          <div>{{bookMark.description}}</div>
+        </div>
+        <div class="d-flex flex-row">
+          <button class="btn btn-primary btn-sm" style="margin-right: 10px;" (click)="update(bookMark)">update</button>
+          <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteConfirm" (click)="delete(bookMark._id)">delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="deleteConfirm" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="exampleModalLabel">are you sure you want to deleted ?</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="confirmDelete()" data-bs-dismiss="modal">confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
