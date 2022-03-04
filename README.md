@@ -95,9 +95,11 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Running Angular and NestJS via Docker Container
+## Angular and NestJS via Docker Container
 
 ```sh
 docker-compose build 
 docker-compose up -d 
+docker-compose stop
+docker-compose down
 ```
