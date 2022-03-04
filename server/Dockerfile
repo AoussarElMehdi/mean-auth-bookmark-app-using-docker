@@ -1,9 +1,9 @@
 FROM alpine
 RUN apk add --update nodejs npm
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
+COPY package*.json /app
+RUN cd /app && npm set progress=false && npm install
+COPY . /app
 EXPOSE 3000
 CMD ["npm", "run", "start"]
 

@@ -1,15 +1,17 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { AuthDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from 'src/schemas';
+import { ClientKafka } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @Inject('BOOKMARK_SERVICE') private readonly client: ClientKafka,
     private jwt: JwtService
   ) { }
 
@@ -27,6 +29,19 @@ export class AuthService {
       });
 
       const user = await newUser.save();
+
+      // produce message while user sign up
+      this.client.emit(
+        'USER-SIGN-UP',
+        {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email
+        }
+      ).subscribe(
+        result => console.log(result),
+        err => { throw new Error('produce message error') }
+      )
 
       return this.signToken(String(user._id), user.email);
     } catch (error) {
@@ -47,6 +62,19 @@ export class AuthService {
       const isMatch = await bcrypt.compare(dto.password, user.password);
       // if password incorrect throw exception
       if (!isMatch) throw new ForbiddenException('password incorrect');
+
+      // produce message while user sign in
+      this.client.emit(
+        'USER-SIGN-IN',
+        {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email
+        }
+      ).subscribe(
+        result => console.log(result),
+        err => { throw new Error('produce message error') }
+      )
       // send back the user
       return this.signToken(String(user._id), user.email);
     } catch (error) {
@@ -54,10 +82,10 @@ export class AuthService {
     }
   }
 
-  async signToken(userId: string, email: string): Promise<{accessToken: string}> {
-    const payload = {sub: userId, email};
-    
-    const token = await this.jwt.signAsync(payload,{
+  async signToken(userId: string, email: string): Promise<{ accessToken: string }> {
+    const payload = { sub: userId, email };
+
+    const token = await this.jwt.signAsync(payload, {
       expiresIn: '15m',
       secret: process.env.JWT_SECRET
     })
