@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { KeycloakModule } from 'src/keycloak/keycloak.module';
+import { KeycloakService } from 'src/keycloak/keycloak.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategy';
@@ -22,7 +24,8 @@ import { JwtStrategy } from './strategy';
           },
         },
       }
-    ])
+    ]),
+    KeycloakModule
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

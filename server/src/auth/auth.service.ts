@@ -6,12 +6,14 @@ import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from 'src/schemas';
 import { ClientKafka } from '@nestjs/microservices';
+import { KeycloakService } from 'src/keycloak/keycloak.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @Inject('BOOKMARK_SERVICE') private readonly client: ClientKafka,
+    private readonly keycloakService: KeycloakService,
     private jwt: JwtService
   ) { }
 
@@ -30,18 +32,24 @@ export class AuthService {
 
       const user = await newUser.save();
 
+      this.keycloakService.getAccessToken().then((data) => console.log('keycloak',data))
+      .catch((err) => console.log(err))
+      
       // produce message while user sign up
-      this.client.emit(
-        'USER-SIGN-UP',
-        {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email
-        }
-      ).subscribe(
-        result => console.log(result),
-        err => { throw new Error('produce message error') }
-      )
+      // this.client.emit(
+      //   'USER-SIGN-UP',
+      //   {
+      //     firstName: user.firstName,
+      //     lastName: user.lastName,
+      //     email: user.email
+      //   }
+      // ).subscribe(
+      //   result => console.log(result),
+      //   err => { 
+      //     console.log(err)
+      //     throw new Error('produce message error')
+      //   }
+      // )
 
       return this.signToken(String(user._id), user.email);
     } catch (error) {
@@ -73,7 +81,10 @@ export class AuthService {
         }
       ).subscribe(
         result => console.log(result),
-        err => { throw new Error('produce message error') }
+        err => { 
+          console.log(err)
+          throw new Error('produce message error') 
+        }
       )
       // send back the user
       return this.signToken(String(user._id), user.email);

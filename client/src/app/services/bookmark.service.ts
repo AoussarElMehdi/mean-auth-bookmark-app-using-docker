@@ -17,6 +17,7 @@ export class BookmarkService {
   };
 
   getBookMarks() {
+    console.log(localStorage.getItem('token'))
     return this.http.get<any>( `${env.BASE_URL}bookmarks`, this.httpOptions);
   }
 

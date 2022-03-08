@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { KeycloakModule } from './keycloak/keycloak.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { AppController } from './app.controller';
           },
         },
       }
-    ])
+    ]),
+    KeycloakModule
   ],
   controllers: [AppController],
   providers: [
