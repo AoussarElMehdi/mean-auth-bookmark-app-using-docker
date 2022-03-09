@@ -4,8 +4,9 @@ import { GetUser } from 'src/auth/decorator';
 import { User } from 'src/schemas';
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
+import { KeycloakGuard } from 'src/keycloak/keycloak.guard';
 
-@UseGuards(JwtGuard)
+@UseGuards(KeycloakGuard)
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }
@@ -17,7 +18,7 @@ export class UserController {
 
     @Patch()
     editUser(
-        @GetUser('_id') userId: string,
+        @GetUser('sub') userId: string,
         @Body() dto: EditUserDto,
     ) {
         return this.userService.editUser(userId, dto);

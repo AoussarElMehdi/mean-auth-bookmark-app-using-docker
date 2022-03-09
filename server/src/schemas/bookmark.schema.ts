@@ -16,8 +16,8 @@ export class BookMark {
   @Prop({ required: true })
   link: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  user: User;
+  @Prop({ required: true })
+  user: string;
 }
 
 export const BookMarkSchema = SchemaFactory.createForClass(BookMark);

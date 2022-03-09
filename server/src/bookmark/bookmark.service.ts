@@ -8,26 +8,26 @@ import { CreateBookmarkDto, EditBookmarkDto } from './dto';
 export class BookmarkService {
     constructor(
         @InjectModel(BookMark.name) private readonly bookMarkModel: Model<BookMarkDocument>
-    ) {}
+    ) { }
 
-    getBookmarks(userId: string) { 
+    getBookmarks(userId: string) {
         return this.bookMarkModel.find({ user: userId });
-     }
+    }
 
     async getBookmarkById(userId: string, bookmarkId: string) {
-        try{
+        try {
             const bookMark = await this.bookMarkModel.findOne({ user: userId, _id: bookmarkId });
 
             if (!bookMark) throw new NotFoundException('BookMark not found');
 
             return bookMark;
-        }catch(e){
+        } catch (e) {
             return e;
         }
     }
 
-    async createBookmark(userId: string, dto: CreateBookmarkDto) { 
-        const newBookmark = new this.bookMarkModel({ 
+    async createBookmark(userId: string, dto: CreateBookmarkDto) {
+        const newBookmark = new this.bookMarkModel({
             user: userId,
             ...dto
         });

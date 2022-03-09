@@ -1,22 +1,22 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorator';
-import { JwtGuard } from 'src/auth/guard';
+import { KeycloakGuard } from 'src/keycloak/keycloak.guard';
 import { BookmarkService } from './bookmark.service';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
 
-@UseGuards(JwtGuard)
+@UseGuards(KeycloakGuard)
 @Controller('bookmarks')
 export class BookmarkController {
     constructor(private bookmarkService: BookmarkService) { }
 
     @Get()
-    getBookmarks(@GetUser('_id') userId: string) {
+    getBookmarks(@GetUser('sub') userId: string) {
         return this.bookmarkService.getBookmarks(userId);
     }
 
     @Get(':id')
     getBookmarkById(
-        @GetUser('_id') userId: string,
+        @GetUser('sub') userId: string,
         @Param('id') bookmarkId: string
     ) {
         return this.bookmarkService.getBookmarkById(userId, bookmarkId);
@@ -24,7 +24,7 @@ export class BookmarkController {
 
     @Post()
     createBookmark(
-        @GetUser('_id') userId: string,
+        @GetUser('sub') userId: string,
         @Body() dto: CreateBookmarkDto
     ) {
         return this.bookmarkService.createBookmark(userId, dto);
@@ -32,7 +32,7 @@ export class BookmarkController {
 
     @Patch(':id')
     editBookmark(
-        @GetUser('_id') userId: string,
+        @GetUser('sub') userId: string,
         @Param('id') bookmarkId: string,
         @Body() dto: EditBookmarkDto
     ) {
@@ -42,7 +42,7 @@ export class BookmarkController {
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete(':id')
     deleteBookmark(
-        @GetUser('_id') userId: string,
+        @GetUser('sub') userId: string,
         @Param('id') bookmarkId: string
     ) {
         return this.bookmarkService.deleteBookmark(userId, bookmarkId);
