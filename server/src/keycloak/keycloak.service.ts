@@ -72,120 +72,160 @@ export class KeycloakService {
     }
 
     async signup(dto: SignUpDto, accessToken: string) {
-        // create a representation of the user
-        const userInfo: userRepresentation = {
-            firstName: dto.firstName,
-            lastName: dto.lastName,
-            email: dto.email,
-            enabled: true,
-            username: dto.username,
-            credentials: [
-                {
-                    type: 'password',
-                    value: dto.password,
-                    temporary: false
-                }
-            ]
+        try {
+            // create a representation of the user
+            const userInfo: userRepresentation = {
+                firstName: dto.firstName,
+                lastName: dto.lastName,
+                email: dto.email,
+                enabled: true,
+                username: dto.username,
+                credentials: [
+                    {
+                        type: 'password',
+                        value: dto.password,
+                        temporary: false
+                    }
+                ]
+            }
+            // setup the header authorization
+            const config = { headers: { Authorization: `Bearer ${accessToken}` } }
+            // send data to the keycloak server to create the user
+            const data = await firstValueFrom(
+                this.http.post(
+                    `${this.baseUrl}/admin/realms/${this.realm}/users`,
+                    userInfo,
+                    config
+                ).pipe(
+                    map(response => response.data),
+                )
+            );
+            return data;
+        } catch (err) {
+            console.log(err.response?.data?.errorMessage)
+            if (err.response?.data) throw new HttpException(err.response?.data?.errorMessage, HttpStatus.BAD_REQUEST)
         }
-        // setup the header authorization
-        const config = { headers: { Authorization: `Bearer ${accessToken}` } }
-        // send data to the keycloak server to create the user
-        const { data } = await firstValueFrom(
-            this.http.post(
-                `${this.baseUrl}/admin/realms/${this.realm}/users`,
-                userInfo,
-                config
-            ),
-        );
-        return data;
     }
 
     async signin(dto: SignInDto) {
-        const data = await firstValueFrom(
-            this.http.post(
-                `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
-                new URLSearchParams({
-                    username: dto.email,
-                    password: dto.password,
-                    client_id: this.clientId,
-                    client_secret: this.clientSecret,
-                    grant_type: "password",
-                }),
-                { headers: { 'Content-Type' : 'application/x-www-form-urlencoded'} }
-            ).pipe(
-                map((response) => {
-                    return new KeycloakToken(
-                        response.data.access_token,
-                        response.data.refresh_token,
-                        response.data.expires_in,
-                        response.data.refresh_expires_in
-                    )
-                }),
-            ),
-        );
-        return data;
-        // return this.http.post(
-        //     `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
-        //     new URLSearchParams({
-        //         client_id: this.clientId,
-        //         client_secret: this.clientSecret,
-        //         grant_type: this.grantType,
-        //         username: dto.username,
-        //         password: dto.password
-        //     }),
-        // ).pipe(
-        //     tap((resp) => console.log(resp.data)),
-        //     map(res => res.data)
-        // )
+        try {
+            const data = await firstValueFrom(
+                this.http.post(
+                    `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
+                    new URLSearchParams({
+                        username: dto.email,
+                        password: dto.password,
+                        client_id: this.clientId,
+                        client_secret: this.clientSecret,
+                        grant_type: "password",
+                    }),
+                    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+                ).pipe(
+                    map((response) => {
+                        return new KeycloakToken(
+                            response.data.access_token,
+                            response.data.refresh_token,
+                            response.data.expires_in,
+                            response.data.refresh_expires_in
+                        )
+                    }),
+                ),
+            );
+            // return this.http.post(
+            //     `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
+            //     new URLSearchParams({
+            //         client_id: this.clientId,
+            //         client_secret: this.clientSecret,
+            //         grant_type: this.grantType,
+            //         username: dto.username,
+            //         password: dto.password
+            //     }),
+            // ).pipe(
+            //     tap((resp) => console.log(resp.data)),
+            //     map(res => res.data)
+            // )
+            return data;
+        } catch (err) {
+            console.log(err.response)
+            if (err.response?.data) throw new HttpException(err.response?.data?.errorMessage || err.response?.data?.error_description, HttpStatus.BAD_REQUEST)
+        }
     }
 
     async authenticate(accessToken: string): Promise<KeycloakUserInfoResponse> {
-        // setup the header authorization
-        const config = { headers: { Authorization: `Bearer ${accessToken}` } }
-        // get user info from access token
-        const data = await firstValueFrom(
-            this.http.get(
-                `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/userinfo`,
-                config
-            ).pipe(
-                map((response) => response.data),
-            ),
-        );
-        return data;
+        try {
+            // setup the header authorization
+            const config = { headers: { Authorization: `Bearer ${accessToken}` } }
+            // get user info from access token
+            const data = await firstValueFrom(
+                this.http.get(
+                    `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/userinfo`,
+                    config
+                ).pipe(
+                    map((response) => response.data),
+                ),
+            );
+            return data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     async refreshToken(header: string) {
-        if (!header) {
-            throw new HttpException('Authorization: Bearer <token> header missing', HttpStatus.UNAUTHORIZED);
-        }
+        try {
+            if (!header) {
+                throw new HttpException('Authorization: Bearer <token> header missing', HttpStatus.UNAUTHORIZED);
+            }
 
-        const parts = header.split(' ');
-        if (parts.length !== 2 || parts[0] !== 'Bearer') {
-            throw new HttpException('Authorization: Bearer <token> header invalid', HttpStatus.UNAUTHORIZED);
+            const parts = header.split(' ');
+            if (parts.length !== 2 || parts[0] !== 'Bearer') {
+                throw new HttpException('Authorization: Bearer <token> header invalid', HttpStatus.UNAUTHORIZED);
+            }
+            const token = parts[1];
+            const data = await firstValueFrom(
+                this.http.post(
+                    `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
+                    new URLSearchParams({
+                        client_id: this.clientId,
+                        client_secret: this.clientSecret,
+                        grant_type: "refresh_token",
+                        refresh_token: token
+                    }),
+                    { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+                ).pipe(
+                    map((response) => {
+                        return new KeycloakToken(
+                            response.data.access_token,
+                            response.data.refresh_token,
+                            response.data.expires_in,
+                            response.data.refresh_expires_in
+                        )
+                    }),
+                ),
+            );
+            return data;
+        } catch (err) {
+            console.log(err)
+            return err
         }
-        const token = parts[1];
+    }
+
+    async logout(refreshToken: string) {
         const data = await firstValueFrom(
             this.http.post(
-                `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
+                `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/logout`,
                 new URLSearchParams({
                     client_id: this.clientId,
                     client_secret: this.clientSecret,
-                    grant_type: "refresh_token",
-                    refresh_token: token
+                    refresh_token: refreshToken,
                 }),
-                { headers: { 'Content-Type' : 'application/x-www-form-urlencoded'} }
+                { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
             ).pipe(
-                map((response) => {
-                    return new KeycloakToken(
-                        response.data.access_token,
-                        response.data.refresh_token,
-                        response.data.expires_in,
-                        response.data.refresh_expires_in
-                    )
-                }),
+                map(res => res.data),
+                catchError(e => { throw new HttpException(e.response.data, e.response.status) })
             ),
         );
-        return data;
+        return data
     }
 
 }

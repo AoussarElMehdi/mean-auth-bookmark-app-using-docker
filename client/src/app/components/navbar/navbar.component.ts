@@ -13,7 +13,7 @@ export class NavbarComponent implements OnInit {
   constructor(private userService: UserService, private router: Router) { }
 
   ngOnInit(): void {
-    if(!(localStorage.getItem('token'))) {
+    if(!(localStorage.getItem('accessToken'))) {
       this.router.navigate(['/signin']);
     }else {
       this.isLoggedIn = true;
@@ -22,7 +22,7 @@ export class NavbarComponent implements OnInit {
     this.userService.authEmitter.subscribe(
       (auth: boolean) => {
         this.isLoggedIn = auth;
-        if(!this.isLoggedIn || !(localStorage.getItem('token'))){
+        if(!this.isLoggedIn || !(localStorage.getItem('accessToken'))){
           this.router.navigate(['/signin']);
         }
       }

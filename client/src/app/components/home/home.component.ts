@@ -25,7 +25,7 @@ export class HomeComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    if(!(localStorage.getItem('token'))) {
+    if(!(localStorage.getItem('accessToken'))) {
       this.router.navigate(['/signin']);
     }else {
       this.isLoggedIn = true;
@@ -41,7 +41,7 @@ export class HomeComponent implements OnInit {
     this.userService.authEmitter.subscribe(
       (auth: boolean) => {
         this.isLoggedIn = auth;
-        if (!this.isLoggedIn || !(localStorage.getItem('token'))) {
+        if (!this.isLoggedIn || !(localStorage.getItem('accessToken'))) {
           this.router.navigate(['/signin']);
         }
       }
@@ -52,6 +52,7 @@ export class HomeComponent implements OnInit {
   get f() { return this.form.controls; }
 
   fetchBookmarks() {
+    if(UserService.iSTokenExpires()) this.userService.refreshToken()
     this.bookmarkService.getBookMarks().subscribe(
       (res) => {
         this.bookMarks = res as BookMark[];
@@ -78,6 +79,7 @@ export class HomeComponent implements OnInit {
   }
 
   confirmDelete() {
+    if(UserService.iSTokenExpires()) this.userService.refreshToken()
     this.bookmarkService.deleteBookMark(this.selectedBook).subscribe(
       (res) => {
         if (res && res.hasOwnProperty('statusCode') && res.statusCode === 401) {
@@ -86,8 +88,7 @@ export class HomeComponent implements OnInit {
           alert('bookMark deleted')
           this.fetchBookmarks();
         }
-      },
-      (err) => { this.userService.signOut() }
+      }
     )
     this.fetchBookmarks();
     this.selectedBook = '';
@@ -100,7 +101,7 @@ export class HomeComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-
+    if(UserService.iSTokenExpires()) this.userService.refreshToken()
     if (this.saveAction) {
       this.bookmarkService.insertBookMark(this.form?.getRawValue()).subscribe(
         (res) => {
@@ -110,8 +111,7 @@ export class HomeComponent implements OnInit {
             alert('bookMark Inserted')
             this.fetchBookmarks();
           }
-        },
-        (err) => { this.userService.signOut() }
+        }
       )
     } else {
       this.bookmarkService.updateBookMark(this.form?.getRawValue()).subscribe(
@@ -122,8 +122,7 @@ export class HomeComponent implements OnInit {
             alert('bookMark updated')
             this.fetchBookmarks();
           }
-        },
-        (err) => { this.userService.signOut() }
+        }
       )
     }
 

@@ -28,4 +28,10 @@ export class AuthController {
   refreshToken(@Headers('Authorization') header: string) {
     return this.keycloakService.refreshToken(header);
   }
+
+  @Post('logout')
+    @HttpCode(204)
+    logout(@Body() body: {refreshToken: string}){
+        return this.keycloakService.logout(body.refreshToken);
+    }
 }

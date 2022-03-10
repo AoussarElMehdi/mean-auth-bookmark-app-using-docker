@@ -12,12 +12,16 @@ export class BookmarkService {
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type':  'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
+      'Authorization': `Bearer ${this.getAccessTokenFromLocalStorage()}`
      })
   };
 
+  getAccessTokenFromLocalStorage(){
+    const token = localStorage.getItem('accessToken');
+    return token;
+  }
+
   getBookMarks() {
-    console.log(localStorage.getItem('token'))
     return this.http.get<any>( `${env.BASE_URL}bookmarks`, this.httpOptions);
   }
 

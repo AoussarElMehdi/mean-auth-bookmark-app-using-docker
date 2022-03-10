@@ -22,6 +22,7 @@ export class SignUpComponent implements OnInit {
     this.form = this.formBuilder.group({
       firstName: '',
       lastName: '',
+      username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]],
     });
@@ -36,18 +37,17 @@ export class SignUpComponent implements OnInit {
     if (this.form.invalid) {
       return;
     }
-    this.userService.signUp(this.form?.getRawValue()).subscribe((res) => {
-      console.log(res)
-      if (res.hasOwnProperty('accessToken')) {
-        localStorage.setItem('token', res.accessToken);
-        this.userService.authEmitter.emit(true);
-        this.router.navigate(['/']);
-      } else {
-        alert(res.message);
+    this.userService.signUp(this.form?.getRawValue()).subscribe((response) => {
+      if (response.status == 201) {
+        alert(response.statusText)
+        this.router.navigate(['/signin']);
+      }else{
+        throw new Error('Internal server error')
       }
     },
-    (err) => {
-      alert(err.error.message);
-  });
+      (err) => {
+        console.log('err', err)
+        alert(err.error.message);
+      });
   }
 }

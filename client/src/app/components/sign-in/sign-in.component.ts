@@ -35,18 +35,15 @@ export class SignInComponent implements OnInit {
       return;
     }
     this.userService.signIn(this.form?.getRawValue()).subscribe((res) => {
-      console.log(res)
-      if (res.hasOwnProperty('accessToken')) {
-        localStorage.setItem('token', res.accessToken);
-        this.userService.authEmitter.emit(true);
-        this.router.navigate(['/']);
-      } else {
-        alert(res.message);
-      }
-    },
-    (err) => {
-      alert(err.error.message);
-  });
+      localStorage.setItem('accessToken', res.accessToken);
+      localStorage.setItem('refreshToken', res.refreshToken);
+      localStorage.setItem('expiresIn', res.expiresIn);
+      localStorage.setItem('refreshExpiresIn', res.refreshExpiresIn);
+      this.userService.authEmitter.emit(true);
+      this.router.navigate(['/']);
+    }, (err) => {
+      alert(err.message);
+    });
   }
 
 }
