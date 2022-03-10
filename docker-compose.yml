@@ -52,6 +52,7 @@ services:
   keycloak:
     image: jboss/keycloak
     container_name: keycloak
+    hostname: keycloak
     ports:
       - 8080:8080
     environment:
@@ -73,7 +74,7 @@ services:
       - 27017:27017
 
   server:
-    image: meanbookmarkserver:1.3.0
+    image: meanbookmarkserver:2.0.0
     container_name: server
     build: server
     depends_on:
@@ -84,7 +85,7 @@ services:
       - meanbookmarkdb
 
   client:
-    image: meanbookmarkapp:1.1.0
+    image: meanbookmarkapp:2.0.0
     container_name: app
     build: client
     ports:
