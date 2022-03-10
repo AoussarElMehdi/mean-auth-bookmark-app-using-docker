@@ -1,12 +1,16 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseFilters } from '@nestjs/common';
+import { Body, Controller, Headers, HttpCode, HttpStatus, Post, UseFilters } from '@nestjs/common';
 import { HttpErrorFilter } from 'src/filter/http-error.filter';
+import { KeycloakService } from 'src/keycloak/keycloak.service';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto } from './dto';
 
 // @UseFilters(new HttpErrorFilter())
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private keycloakService: KeycloakService
+    ) {}
 
   @Post('signup')
   signup(@Body() dto: SignUpDto) {
@@ -17,5 +21,11 @@ export class AuthController {
   @Post('signin')
   signin(@Body() dto: SignInDto) {
     return this.authService.signin(dto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  refreshToken(@Headers('Authorization') header: string) {
+    return this.keycloakService.refreshToken(header);
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom, lastValueFrom, map, tap } from 'rxjs';
@@ -105,7 +105,7 @@ export class KeycloakService {
             this.http.post(
                 `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
                 new URLSearchParams({
-                    username: dto.username,
+                    username: dto.email,
                     password: dto.password,
                     client_id: this.clientId,
                     client_secret: this.clientSecret,
@@ -149,6 +149,40 @@ export class KeycloakService {
                 config
             ).pipe(
                 map((response) => response.data),
+            ),
+        );
+        return data;
+    }
+
+    async refreshToken(header: string) {
+        if (!header) {
+            throw new HttpException('Authorization: Bearer <token> header missing', HttpStatus.UNAUTHORIZED);
+        }
+
+        const parts = header.split(' ');
+        if (parts.length !== 2 || parts[0] !== 'Bearer') {
+            throw new HttpException('Authorization: Bearer <token> header invalid', HttpStatus.UNAUTHORIZED);
+        }
+        const token = parts[1];
+        const data = await firstValueFrom(
+            this.http.post(
+                `${this.baseUrl}/realms/${this.realm}/protocol/openid-connect/token`,
+                new URLSearchParams({
+                    client_id: this.clientId,
+                    client_secret: this.clientSecret,
+                    grant_type: "refresh_token",
+                    refresh_token: token
+                }),
+                { headers: { 'Content-Type' : 'application/x-www-form-urlencoded'} }
+            ).pipe(
+                map((response) => {
+                    return new KeycloakToken(
+                        response.data.access_token,
+                        response.data.refresh_token,
+                        response.data.expires_in,
+                        response.data.refresh_expires_in
+                    )
+                }),
             ),
         );
         return data;
