@@ -35,12 +35,17 @@ export class SignInComponent implements OnInit {
       return;
     }
     this.userService.signIn(this.form?.getRawValue()).subscribe((res) => {
-      localStorage.setItem('accessToken', res.accessToken);
-      localStorage.setItem('refreshToken', res.refreshToken);
-      localStorage.setItem('expiresIn', res.expiresIn);
-      localStorage.setItem('refreshExpiresIn', res.refreshExpiresIn);
-      this.userService.authEmitter.emit(true);
-      this.router.navigate(['/']);
+      if (res?.status == 400) {
+        alert(res.message);
+      } else {
+        console.log(res);
+        localStorage.setItem('accessToken', res.accessToken);
+        localStorage.setItem('refreshToken', res.refreshToken);
+        localStorage.setItem('expiresIn', res.expiresIn);
+        localStorage.setItem('refreshExpiresIn', res.refreshExpiresIn);
+        this.userService.authEmitter.emit(true);
+        this.router.navigate(['/']);
+      }
     }, (err) => {
       alert(err.message);
     });

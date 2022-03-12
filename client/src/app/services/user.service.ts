@@ -46,21 +46,27 @@ export class UserService {
   }
 
   async refreshToken() {
-    await this.http.post<any>(`${env.BASE_URL}auth/refresh`, null, this.httpOptions)
-      .subscribe(
-        (res) => {
-          console.log(res)
-          localStorage.clear();
-          localStorage.setItem('accessToken', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
-          localStorage.setItem('expiresIn', res.expiresIn);
-          localStorage.setItem('refreshExpiresIn', res.refreshExpiresIn);
-          this.authEmitter.emit(true);
-        }, (err) => {
-          alert(err.message);
-          localStorage.clear();
-          this.router.navigate(['/signin']);
-        });
+    if (localStorage.getItem('accessToken')) {
+      await this.http.post<any>(`${env.BASE_URL}auth/refresh`, null, this.httpOptions)
+        .subscribe(
+          (res) => {
+            console.log(res)
+            localStorage.clear();
+            localStorage.setItem('accessToken', res.accessToken);
+            localStorage.setItem('refreshToken', res.refreshToken);
+            localStorage.setItem('expiresIn', res.expiresIn);
+            localStorage.setItem('refreshExpiresIn', res.refreshExpiresIn);
+            this.authEmitter.emit(true);
+          }, (err) => {
+            alert(err.message);
+            localStorage.clear();
+            this.router.navigate(['/signin']);
+          });
+    } else {
+      alert('credentiels client invalid');
+      localStorage.clear();
+      this.router.navigate(['/signin']);
+    }
   }
 
   public static iSTokenExpires(): boolean {

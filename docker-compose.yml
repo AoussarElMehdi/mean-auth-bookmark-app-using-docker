@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.4'
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
@@ -53,9 +53,12 @@ services:
     image: jboss/keycloak
     container_name: keycloak
     hostname: keycloak
+    volumes:
+      - ./imports:/opt/jboss/keycloak/imports
     ports:
       - 8080:8080
     environment:
+        # KEYCLOAK_IMPORT: /opt/jboss/keycloak/imports/realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
         DB_VENDOR: POSTGRES
         DB_ADDR: postgres
         DB_DATABASE: keycloak
@@ -70,13 +73,15 @@ services:
   meanbookmarkdb:
     image: mongo
     container_name: db
+    volumes:
+        - mongodata:/data/db
     ports:
       - 27017:27017
 
   server:
     image: meanbookmarkserver:2.0.0
     container_name: server
-    build: server
+    build: server/
     depends_on:
       - kafka
     ports:
@@ -85,12 +90,14 @@ services:
       - meanbookmarkdb
 
   client:
-    image: meanbookmarkapp:2.0.0
+    image: meanbookmarkapp:test
     container_name: app
-    build: client
+    build: client/
     ports:
       - 4200:80
 
 volumes:
   postgres_data:
+      driver: local
+  mongodata:
       driver: local
