@@ -90,7 +90,7 @@ services:
       - meanbookmarkdb
 
   client:
-    image: meanbookmarkapp:test
+    image: meanbookmarkapp:2.0.0
     container_name: app
     build: client/
     ports:
