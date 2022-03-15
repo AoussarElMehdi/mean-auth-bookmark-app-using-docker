@@ -88,7 +88,8 @@ export class HomeComponent implements OnInit {
           alert('bookMark deleted')
           this.fetchBookmarks();
         }
-      }
+      },
+      err => alert(err.message)
     )
     this.fetchBookmarks();
     this.selectedBook = '';
@@ -111,7 +112,8 @@ export class HomeComponent implements OnInit {
             alert('bookMark Inserted')
             this.fetchBookmarks();
           }
-        }
+        },
+        err => alert(err.message)
       )
     } else {
       this.bookmarkService.updateBookMark(this.form?.getRawValue()).subscribe(
@@ -122,7 +124,8 @@ export class HomeComponent implements OnInit {
             alert('bookMark updated')
             this.fetchBookmarks();
           }
-        }
+        },
+        err => alert(err.message)
       )
     }
 
