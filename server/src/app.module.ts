@@ -11,6 +11,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { KeycloakModule } from './keycloak/keycloak.module';
+import { KeycloakService } from './keycloak/keycloak.service';
+import { HttpModule, HttpService } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -37,11 +39,13 @@ import { KeycloakModule } from './keycloak/keycloak.module';
         },
       }
     ]),
-    KeycloakModule
+    KeycloakModule,
+    HttpModule
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    KeycloakService,
     {
       provide: APP_FILTER,
       useClass: HttpErrorFilter,

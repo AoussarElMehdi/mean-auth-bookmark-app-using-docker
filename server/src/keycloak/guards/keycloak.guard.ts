@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 import { Request } from 'express';
-import { KeycloakService } from './keycloak.service';
+import { KeycloakService } from '../keycloak.service';
 
 @Injectable()
 export class KeycloakGuard implements CanActivate {

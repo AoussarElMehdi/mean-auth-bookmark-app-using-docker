@@ -4,7 +4,7 @@ import { GetUser } from 'src/auth/decorator';
 import { User } from 'src/schemas';
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
-import { KeycloakGuard } from 'src/keycloak/keycloak.guard';
+import { KeycloakGuard } from 'src/keycloak/guards/keycloak.guard';
 
 @UseGuards(KeycloakGuard)
 @Controller('users')

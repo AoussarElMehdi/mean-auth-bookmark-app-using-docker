@@ -79,7 +79,7 @@ services:
       - 27017:27017
 
   server:
-    image: meanbookmarkserver:2.0.0
+    image: meanbookmarkserver:2.0.1
     container_name: server
     build: server/
     depends_on:
@@ -101,3 +101,7 @@ volumes:
       driver: local
   mongodata:
       driver: local
+
+#       Roles :
+# admin : Editor+Reader
+# Guest : Read
